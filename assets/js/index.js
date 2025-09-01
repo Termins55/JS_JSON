@@ -1,44 +1,24 @@
 "use strict";
 
-// Promise
+alert('qwerty'); // блокування - погано!
 
-// cb виконається через 1000мс
-// setInterval(cb, 1000);
+console.log('before timeoutv');
 
-// cb виконається, коли буде подія click
-// button.addEventListener('click', cb)
+setTimeout(() => {
+  console.log('in timeout'); // => webApi
+}, 1000);
 
-// Колбек, вказаний в then виконається тоді,
-// коли проміс state стане fullfilled
-// Колбек, вказаний в catch виконається тоді,
-// коли проміс state стане rejected
+console.log('after timeout');
 
-const weatherUrl =
-  "https://api.open-meteo.com/v1/forecast?latitude=48.5083&longitude=32.2662&hourly=temperature_2m&timezone=Europe%2FBerlin&forecast_days=1";
 
-fetch(weatherUrl)
-  .then((response) => response.json())
-  .then((data) => console.log(data))
-  .catch((err) => console.log("error :>> ", err));
+// call stack
+function f1() {
+  console.trace();
+  console.log('end');
+}
+function f() {
+  console.trace();
+  f1();
+}
 
-// Second then form:
-// fetch(weatherUrl)
-//   .then((response) => response.json())
-//   .then(
-//     (data) => console.log(data),
-//     (err) => console.log("error :>> ", err)
-//   );
-// Promise state (pending, fullfilled, rejected)
-//         result           payload     error
-console.log("next line");
-
-// callback hell:
-// setTimeout(() => {
-//   setTimeout(() => {
-//     setTimeout(() => {
-//       setTimeout(() => {
-//         setTimeout(() => {}, 2000);
-//       }, 2000);
-//     }, 2000);
-//   }, 2000);
-// }, 1000);
+f();
