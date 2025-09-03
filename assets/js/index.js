@@ -1,63 +1,87 @@
 "use strict";
 
-let isCelsiiDegrii = true;
+// status pending
 
-const tempUnitBtn = document.getElementById("tempUnitBtn");
+// status fullfilled (result - payload) -> then
+// status rejected   -> catch
 
-tempUnitBtn.onclick = switchTemperatureUnit;
-
-function switchTemperatureUnit() {
-  // поміняти значення прапорця на протилежне
-  isCelsiiDegrii = !isCelsiiDegrii;
-  // // поміняти напис на кнопці
-  // tempUnitBtn.textContent = `Switch to ${isCelsiiDegrii ? "F" : "C"}`;
-  // // завантажити дані з температурою в нових одиницях
-  // fetch()
-  //   .then((response) => response.json())
-  //   .then((data) => generateWeather(data))
-  //   .catch((err) => console.log("error :>> ", err));
-  updateData();
-}
-updateData();
-
-function updateData() {
-  tempUnitBtn.textContent = `Switch to ${isCelsiiDegrii ? "F" : "C"}`;
-  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=47.8517&longitude=35.1171&current_weather=true&timezone=auto${
-    isCelsiiDegrii ? "" : "&temperature_unit=fahrenheit"
-  }`;
-
-  fetch(weatherUrl)
-    .then((response) => response.json())
-    .then((data) => generateWeather(data))
-    .catch((err) => console.log("error :>> ", err));
+function promiseCb(resolve, reject) {
+  // actions
+  // resolve('succuss result');
+  reject(new Error("something went wrong"));
 }
 
-// Example: відобразити на сторінці поточну температуру з одиницею виміру
-// відобразити темп. від'ємну синім кольором, 0 -чорним
-//                   додатню до 40 - зеленим, >=40 - червоним
+const promise = new Promise(promiseCb);
 
-// Task: відобразити швидкість вітру з одиницею виміру
+promise
+  .then((data) => console.log("data :>> ", data))
+  .catch((err) => console.log("err :>> ", err));
 
-function generateWeather({
-  current_weather: { temperature, windspeed },
-  current_weather_units: { temperature: tempUnit, windspeed: windUnit },
-}) {
-  const currentTemperatureEl = document.querySelector(".temp");
-  currentTemperatureEl.textContent = `${temperature} ${tempUnit}`;
-  currentTemperatureEl.style.color = calcTemperatureColor(temperature);
+// Promise.resolve([{ user: "Test" }]).then((data) =>
+//   console.log("data :>> ", data)
+// );
+// Promise.reject().catch()
 
-  const currentWindspeed = document.querySelector(".wind");
-  currentWindspeed.textContent = `${windspeed} ${windUnit}`;
-}
+console.log("end of sync code");
 
-function calcTemperatureColor(temperature) {
-  if (temperature < 0) {
-    return "blue";
-  } else if (temperature === 0) {
-    return "black";
-  } else if (temperature > 0 && temperature < 40) {
-    return "green";
+// проміс - кіт Шредингера
+
+const executor = function (resolve, reject) {
+  if (Math.random() < 0.5) {
+    resolve("cat is alive");
   } else {
-    return "red";
+    reject(new Error("cat is not alive"));
   }
+};
+
+const shredCat = new Promise(executor);
+
+shredCat
+  .then((data) => console.log("data :>> ", data))
+  .catch((err) => console.log("err :>> ", err));
+
+// промісифікувати setTimeout
+// setTimeout(cb,1000)
+// delay(1000).then(cb)
+
+function delay(ms) {
+  if (typeof ms !== "number") {
+    rej(new TypeError("ms must be number"));
+  }
+  if (ms < 0 || Number.isInteger(ms)) {
+    rej(new RangeError("ms must be positive integer value"));
+  }
+  const executor = function (res, rej) {
+    setTimeout(res, ms);
+  };
+  return new Promise(executor);
+}
+
+// setTimeout(() => console.log('action is over '), 1000);
+delay(1000)
+  .then((data) => console.log("data :>> ", data))
+  .catch((err) => console.log("err :>> ", err));
+
+//___________________________________________________
+
+
+const src = 'https://klike.net/uploads/posts/2019-01/1547365376_1.jpg';
+
+loadImage(src)
+  .then(img => {
+    document.body.append(img);
+  })
+  .catch(e => console.log('e :>> ', e));
+
+function loadImage(src) {
+  return new Promise((res, rej) => {
+    const img = document.createElement('img');
+    img.src = src;
+    img.onload = () => {
+      res(img);
+    };
+    img.onerror = () => {
+      rej(new Error('image was not loaded'));
+    };
+  });
 }
